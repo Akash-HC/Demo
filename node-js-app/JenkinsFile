@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "yourdockerhubusername/hello-argocd:latest"
+        DOCKER_IMAGE = "akashhc55/hello-argocd:latest"
         GIT_REPO = "https://github.com/Akash-HC/ArgoCD-Test"
         YAML_FILE = "test-poc/deployment.yaml"
     }   
