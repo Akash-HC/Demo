@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "yourdockerhubusername/hello-argocd:latest"
+        GIT_REPO = "https://github.com/Akash-HC/ArgoCD-Test"
+        YAML_FILE = "test-poc/deployment.yaml"
+    }   
+
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $DOCKER_IMAGE .'
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withDockerRegistry([credentialsId: 'docker-hub-creds', url: 'https://hub.docker.com/repositories/akashhc55']) {
+                    sh 'docker push $DOCKER_IMAGE'
+                }
+            }
+        }
+
+        stage('Update Kubernetes Manifests') {
+            steps {
+                dir('gitops-manifests') {
+                    git credentialsId: 'git-creds-id', url: "$GIT_REPO", branch: 'main'
+
+                    script {
+                        def content = readFile(file: YAML_FILE)
+                        def updated = content.replaceAll("image: .*", "image: $DOCKER_IMAGE")
+                        writeFile(file: YAML_FILE, text: updated)
+                    }
+
+                    sh '''
+                      git config user.email "akashchalkodu@gmail.com"
+                      git config user.name "Akash-HC"
+                      git add $YAML_FILE
+                      git commit -m "Update image to $DOCKER_IMAGE"
+                      git push origin main
+                    '''
+                }
+            }
+        }
+    }
+}
