@@ -37,12 +37,11 @@ pipeline {
             steps {
                 dir('gitops-manifests') {
                     // Clone the repo using GitHub token credentials
-                    withCredentials([string(credentialsId: 'git-creds-id', variable: 'GITHUB_TOKEN')]) {
+                    withCredentials([usernamePassword(credentialsId: 'git-creds-id', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                         sh '''
                             git config --global user.email "akashchalkodu@gmail.com"
                             git config --global user.name "Akash-HC"
-
-                            git clone https://$GITHUB_TOKEN@github.com/Akash-HC/ArgoCD-Test.git .
+                            git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/Akash-HC/ArgoCD-Test.git .
                         '''
                     }
 
